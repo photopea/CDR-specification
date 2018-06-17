@@ -61,7 +61,7 @@ Contains a raster image: a thumbnail of the CDR file.
     1024  bytes   Palette for the image (256 samples * 4 bytes per sample)
     W*H   bytes   Indices to the palette for each pixel
 
-## LIST X  //  X is not "cmpr" or "stlt"
+## LIST X  -  X is not "cmpr" or "stlt"
 Contains subchunks.
 
     Size  Type    Value
