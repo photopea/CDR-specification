@@ -23,7 +23,7 @@ The file is a sequence of bytes. Following data types are used in this document:
 
     Size  Type    Value
     4     asci4   "RIFF"
-    4     uint4   The length of the following data
+    4     uint4   The length of the following data (file size - 8)
     4     asci4   "CDR" + a byte, identifying the format version
     *     CHUNKS  The sequence of chunks
 
@@ -31,11 +31,24 @@ A chunk is a sequence of bytes in the following format
 
     Size  Type    Value
     4     asci4   Identifier of the chunk
-    4     uint4   N : the length of the chunk
+    4     uint4   N : the size of the chunk content
     N     bytes   The content of the chunk
+
+When the size of a chunk is odd, there is a one-byte padding before the next chunk.
+
+When the chunk identifier is "LIST", the content starts with asci4, which is called a **list-type**.
     
-When the Identifier is "LIST", the first four bytes of the content contain an asci4, which is called a **list-type**
+The CDR file contains six chunks (starting at byte 12): 
+
+    ID     Size   list-type
+    vrsn   2      
+    DISP   *      
+    LIST   24     INFO
+    LIST   52     cmpr
+    LIST   *      cmpr
+    sumi   60
+ 
+ 
     
-The regular CDR file contains following chunks (starting at byte 12): 
     
-    ID    
+    
