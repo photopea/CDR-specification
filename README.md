@@ -8,10 +8,10 @@ There are two categories of CDR files:
 - Start with `WL`: Old Format - used before 1992
 - Start with `RIFF`: RIFF Format - used after 1992
 
-## Old Format
+# Old Format
 - starts with ASCII bytes `WL`
 
-## RIFF Format
+# RIFF Format
 
 The file structure corresponds to the RIFF format. Some "LIST" chunks contain data, which can not be interpreted as subchunks.
 
@@ -19,7 +19,7 @@ The file is a sequence of bytes. Following data types are used in this document:
 - `asci4` - four bytes, interpreted as a four-byte ASCII string
 - `uint4` - four bytes, interpreted as a 32-bit unsigned integer in Little Endian
 
-### File Structure
+## File Structure
 
     Size  Type    Value
     4     asci4   "RIFF"
@@ -34,7 +34,7 @@ A chunk is a sequence of bytes in the following format
     4     uint4   N : the size of the chunk content
     N     bytes   The content of the chunk
 
-When the size of a chunk is odd, there is a one-byte padding before the next chunk.
+When N is odd, there is a one-byte padding before the next chunk.
 
 When the chunk identifier is "LIST", the content starts with asci4, which is called a **list-type**.
     
@@ -47,8 +47,40 @@ The CDR file contains six chunks (starting at byte 12):
     LIST   52     cmpr
     LIST   *      cmpr
     sumi   60
- 
- 
+
+The main data is in the fifth chunk. The content of important chunk types is described below.
+
+## DISP
+Contains a raster image: a thumbnail of the CDR file.
+
+    Size  Type    Value
+    8     bytes   unknown
+    4     uint4   W: width
+    4     uint4   H: height
+    28    bytes   unknown
+    1024  bytes   Palette for the image (256 samples x 4 bytes per sample)
+    W*H   bytes   Indices to the palette for each pixel
+
+## LIST cmpr
+Contains compressed subchunks.
+
+    Size  Type    Value
+    4     uint4   C1 - the size of Part1 compressed
+    4     uint4   U1 - the size of Part1 uncompressed
+    4     uint4   C2 - the size of Part2 compressed
+    4     uint4   U2 - the size of Part2 uncompressed
     
+    4     asci4   "CPng"
+    4     bytes   0x01, 0x00, 0x04, 0x00
+    C1-8  bytes   Part1 compressed with ZLIB
+    4     asci4   "CPng"
+    4     bytes   0x01, 0x00, 0x04, 0x00
+    C2-8  bytes   Part1 compressed with ZLIB
+
+This chunk contains two (decompressed) byte sequences: Part1 and Part2. Part2 is a list of uint4 numbers.
+
+Part1 is `CHUNKS`: a sequence of chunks with a small difference: the Size of each chunk is not the actual size, but the index into Part2, where the true Size is stored.
+
+
     
     
