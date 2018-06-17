@@ -58,13 +58,21 @@ Contains a raster image: a thumbnail of the CDR file.
     4     uint4   W: width
     4     uint4   H: height
     28    bytes   unknown
-    1024  bytes   Palette for the image (256 samples x 4 bytes per sample)
+    1024  bytes   Palette for the image (256 samples * 4 bytes per sample)
     W*H   bytes   Indices to the palette for each pixel
 
+## LIST X  //  X is not "cmpr" or "stlt"
+Contains subchunks.
+
+    Size  Type    Value
+    4     asci4   list-type
+    *     CHUNKS  The sequence of chunks
+    
 ## LIST cmpr
 Contains compressed subchunks.
 
     Size  Type    Value
+    4     asci4   "cmpr"
     4     uint4   C1 - the size of Part1 compressed
     4     uint4   U1 - the size of Part1 uncompressed
     4     uint4   C2 - the size of Part2 compressed
@@ -80,6 +88,13 @@ Contains compressed subchunks.
 This chunk contains two (decompressed) byte sequences: Part1 and Part2. Part2 is a list of uint4 numbers.
 
 Part1 is `CHUNKS`: a sequence of chunks with a small difference: the Size of each chunk is not the actual size, but the index into Part2, where the true Size is stored.
+
+## LIST stlt
+Some weird structure.
+
+    Size  Type    Value
+    4     asci4   "stlt"
+    *     bytes   unknown
 
 
     
