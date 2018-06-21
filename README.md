@@ -25,6 +25,7 @@ The file is a sequence of bytes. Following data types are used in this document:
 - `sint4` - four bytes, interpreted as a 32-bit signed integer in Little Endian
 - `doubl` - 64-bit floating point number in Little Endian
 - `coord` - if V<600, the value is sint2 / 1000,  otherwise sint4 / 254 000
+- `string` - the sequence of non-zero bytes, ended with a zero byte, represents an ASCII text
 
 ## File Structure
 
@@ -191,7 +192,7 @@ Part1 is `CHUNKS`: a sequence of chunks with a small difference: the Size of eac
     4     uint4   Drop Cap ID
     // end if
     
-Map 12 has a following structure:
+Map12 has a following structure:
 
     4     uint4   Number of Values (NOV)
     // repeated NOV times:
@@ -199,7 +200,24 @@ Map 12 has a following structure:
     4     uint4   unknown
     4     uint4   Value
     48    bytes   unknown data (only for Fill IDs, when V>=1300)
+    
+## font
+Data of a single font
+    4     uint2   Font ID
+    4     uint2   Encoding ID
+    14    bytes   unknown
+    *     string  Font name
+    
+## mcfg
+Configuration
 
+    *     bytes   unknown. Size (if V>=1300 : 12,  else if V>=900 : 4,  else if  700>V>=600 : 28)
+    *     coord   Default page width
+    *     coord   Default page height
+    
+## loda
+Shape data  (geometry + fills + outlines)
+    
 
     
     
