@@ -15,9 +15,16 @@ There are two categories of CDR files:
 
 The file structure corresponds to the RIFF format. Some "LIST" chunks contain data, which can not be interpreted as subchunks.
 
+Each CRD file has a version **V** associated with it. The structure of some parts of the file may depend on V.
+
 The file is a sequence of bytes. Following data types are used in this document:
 - `asci4` - four bytes, interpreted as a four-byte ASCII string
+- `uint2` - two bytes, interpreted as a 16-bit unsigned integer in Little Endian
 - `uint4` - four bytes, interpreted as a 32-bit unsigned integer in Little Endian
+- `sint2` - two bytes, interpreted as a 16-bit signed integer in Little Endian
+- `sint4` - four bytes, interpreted as a 32-bit signed integer in Little Endian
+- `doubl` - 64-bit floating point number in Little Endian
+- `coord` - if V<600, the value is sint2 / 1000,  otherwise sint4 / 254 000
 
 ## File Structure
 
@@ -38,7 +45,7 @@ When N is odd, there is a one-byte padding before the next chunk.
 
 When the chunk identifier is "LIST", the content starts with asci4, which is called a **list-type**.
     
-The CDR file contains six chunks (starting at byte 12): 
+The CDR file usually consists of six chunks (starting at byte 12): 
 
     ID     Size   list-type
     vrsn   2      
@@ -48,8 +55,14 @@ The CDR file contains six chunks (starting at byte 12):
     LIST   *      cmpr
     sumi   60
 
-The main data is in the fifth chunk. The content of important chunk types is described below.
+The main data is in the second "LIST cmpr" chunk. The content of important chunk types is described below.
 
+## vrsn 
+Contains a **version** (below as **V**) of the file
+
+    Size  Type    Value
+    2     uint2   Version of the file
+    
 ## DISP
 Contains a raster image: a thumbnail of the CDR file.
 
@@ -90,11 +103,102 @@ This chunk contains two (decompressed) byte sequences: Part1 and Part2. Part2 is
 Part1 is `CHUNKS`: a sequence of chunks with a small difference: the Size of each chunk is not the actual size, but the index into Part2, where the true Size is stored.
 
 ## LIST stlt
-Some weird structure.
+**ST**y**L**es of **T**ext
 
     Size  Type    Value
     4     asci4   "stlt"
-    *     bytes   unknown
+    4     uint4   Number of Records (NOR)
+    *     Map12   Fill IDs
+    *     Map12   Outline IDs
+    
+    4     uint4   Number of Fonts (NOF)
+    // repeated NOF times
+    4     uint4   Font Style ID
+    *     bytes   unknown.  Size: V<1000 ? 12 : 20
+    4     uint4   Font ID
+    4     uint4   Font Encoding
+    8     bytes   unknown
+    *     coord   Font Size
+    *     bytes   unknown.  Size: V<1000 ? 12 : 20
+    //  end repeat
+    *     Map12   Align IDs
+    4     uint4   Number of Intervals (NOI)
+    52*NOI        unknown
+    4     uint4   Number of Set5 (NOS)
+    152*NOS       unknown
+    4     uint4   Number of Tabs (NOT)
+    784*NOT       unknown
+    
+    4     uint4   Number of Bullets  (NOB)
+    //  repeat NOB times
+    40    byets   unknown
+    4     uint4   unknown  (only when V>1300)
+    //  if  V>=1300
+    4     uint4   X       
+    68    bytes   unknown  (if X not 0)
+    12    bytes   unknown  (if X ==  0)
+    //  else 
+    20    bytes   unknown
+    8     bytes   unknown  (if V>=1000)
+    4     uint4   X
+    8     bytes   unknown  (if X not 0)
+    8     bytes   unknown
+    //  end if
+    //  end repeat
+    
+    4     uint4   Number of Indents (NOI)
+    //  repeat NOI times
+    4     uint4   Indent ID
+    12    bytes   unknown
+    *     coord   right indent
+    *     coord   first indent
+    *     coord   left indent
+    //  end repeat
+    
+    4     uint4   Number of Hypens (NOH)
+    //  repeat NOH times
+    32    bytes   unknown
+    4     bytes   unknown (if V>=1300)
+    //  end repeat
+    
+    4     uint4   Number of Dropcaps (NOD)
+    28*NOD        unknown
+    
+    4     uint4   Number of Set11  (NOS, if V>800)
+    12*NOS        unknown  (if V>800)
+    
+    //  repeat NOR times 
+    4     uint4   NUM
+    4     uint4   Style ID
+    4     uint4   Parent ID
+    4     uint4   NL
+    NL    bytes   unknown 
+    NL    bytes   unknown (if V>=1200)
+    4     uint4   Fill ID
+    4     uint4   Outline ID
+    // if NUM > 1
+    4     uint4   Font Rec ID
+    4     uint4   Align ID
+    4     uint4   Interval ID
+    4     uint4   Set5 ID
+    4     uint4   Set11 ID  (if V>800)
+    // end if
+    // if NUM > 2
+    4     uint4   Tab ID
+    4     uint4   Bullet ID
+    4     uint4   Indent ID
+    4     uint4   Hyphen ID
+    4     uint4   Drop Cap ID
+    // end if
+    
+Map 12 has a following structure:
+
+    4     uint4   Number of Values (NOV)
+    // repeated NOV times:
+    4     uint4   ID
+    4     uint4   unknown
+    4     uint4   Value
+    48    bytes   unknown data (only for Fill IDs, when V>=1300)
 
 
     
