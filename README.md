@@ -203,6 +203,7 @@ Map12 has a following structure:
     
 ## font
 Data of a single font
+
     4     uint2   Font ID
     4     uint2   Encoding ID
     14    bytes   unknown
