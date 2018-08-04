@@ -97,7 +97,7 @@ Contains compressed subchunks.
     C1-8  bytes   Part1 compressed with ZLIB
     4     asci4   "CPng"
     4     bytes   0x01, 0x00, 0x04, 0x00
-    C2-8  bytes   Part1 compressed with ZLIB
+    C2-8  bytes   Part2 compressed with ZLIB
 
 This chunk contains two (decompressed) byte sequences: Part1 and Part2. Part2 is a list of uint4 numbers.
 
